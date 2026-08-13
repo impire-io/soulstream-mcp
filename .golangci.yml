@@ -1,0 +1,24 @@
+version: "2"
+
+linters:
+  # Default set (errcheck, govet, ineffassign, staticcheck, unused) plus a few.
+  enable:
+    - revive
+    - misspell
+    - unconvert
+  settings:
+    errcheck:
+      # Writing to stdout/stderr and ignoring the (near-impossible) error is idiomatic.
+      exclude-functions:
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/impire-io/soulstream-mcp
