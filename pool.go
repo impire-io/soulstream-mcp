@@ -470,6 +470,14 @@ func (e *entry) connect() error {
 		_ = rc.Close()
 		return fmt.Errorf("realm %q is not provisioned on this server (stream %s: %v) — provision it once with `soulstream provision`; the node never provisions", cfg.Realm, realm.StreamName, err)
 	}
+	// F1 (core v0.9.0): the signer's key materialises custodian-side, so
+	// the signer's constructor owns making it reader-resolvable. Failure
+	// never refuses admission — but it is loud: until the directory
+	// carries the key, this persona's records read unknown-key.
+	if err := registry.EnsureSigningKey(ctx, rc, signer); err != nil {
+		cfg.Logger.Warn("node: signing key not published to the directory (records will read unknown-key)",
+			"persona", persona, "err", err)
+	}
 	e.nc, e.rc, e.persona, e.account = nc, rc, persona, account
 	e.server = mcpserver.NewServer(rc, mcpserver.WithKeyring(e.keyringFor))
 	cfg.Logger.Info("node: admitted", "persona", persona, "account", account, "hint_class", hintClass(e.keys[0]))
